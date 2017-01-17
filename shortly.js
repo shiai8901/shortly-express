@@ -2,7 +2,7 @@ var express = require('express');
 var util = require('./lib/utility');
 var partials = require('express-partials');
 var bodyParser = require('body-parser');
-
+var cookieParser = require('cookie-parser');
 
 var db = require('./app/config');
 var Users = require('./app/collections/users');
@@ -18,32 +18,92 @@ app.set('view engine', 'ejs');
 app.use(partials());
 // Parse JSON (uniform resource locators)
 app.use(bodyParser.json());
+app.use(cookieParser());
 // Parse forms (signup/login)
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
 
 
-app.get('/', 
-function(req, res) {
-  res.render('index');
+app.get('/', function(req, res) {
+  // res.render('index');
+  res.cookie('visited', '/');
+  res.redirect('/login');
 });
 
-app.get('/create', 
-function(req, res) {
-  res.render('index');
+app.get('/login', function(req, res) {
+  res.cookie('visited', 'login');
+  res.render('login');
 });
 
-app.get('/links', 
-function(req, res) {
-  Links.reset().fetch().then(function(links) {
-    res.status(200).send(links.models);
+app.get('/create', function(req, res) {
+  res.redirect('/login');
+  // res.render('index');
+});
+
+app.get('/signup', function(req, res) {
+  res.render('signup');
+});
+app.post('/signup', function(req, res) {
+  // console.log('POST signup: ', req.body);
+  new User(req.body).fetch().then(function(found) {
+    if (found) {
+      res.status(200).send('This username is already taken.');
+    } else {
+      Users.create({
+        username: req.body.username,
+        password: req.body.password
+      }).then(function() {
+        // res.location = '/';
+        res.status(200).redirect('/');
+      });
+    }
   });
+}); 
+
+app.post('/login', function(req, res) {
+  // console.log('POST login: ', req.body);
+  var username = req.body.username;
+  var password = req.body.password;
+  new User({'username': username}).fetch().then(function(found) {
+    console.log('found, ', found);
+    if (found) {
+      res.status(200).redirect('/');
+    } else {
+      res.status(404).redirect('/login');
+    }
+  });
+
+});
+
+app.get('/links', function(req, res) {
+  // res.cookie('visited', 'links');
+  // console.log('auth', req.cookies);
+  // console.log('!req.cookies', !req.cookies);
+  //console.log('res', res.cookie());
+  if (req.cookies.post) {
+    Links.reset().fetch().then(function(links) {
+      res.status(200).send(links.models);   
+    }); 
+  } else {
+    res.redirect('/login');
+  }
+  // if (!req.cookies) {
+  //   res.redirect('/login');
+  // } else {
+  //   res.cookie('links', 'yes');
+  //   Links.reset().fetch().then(function(links) {
+  //     res.status(200).send(links.models);   
+  //   });
+  // }
+  // Links.reset().fetch().then(function(links) {
+  //   res.status(200).send(links.models);
+    // res.redirect('/login');
 });
 
 app.post('/links', 
 function(req, res) {
   var uri = req.body.url;
-
+  res.cookie('post', 'yes');
   if (!util.isValidUrl(uri)) {
     console.log('Not a valid url: ', uri);
     return res.sendStatus(404);
