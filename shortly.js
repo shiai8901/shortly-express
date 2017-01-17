@@ -53,9 +53,9 @@ app.get('/login', function(req, res) {
   res.render('login');
 });
 
-app.get('/create', function(req, res) {
-  res.redirect('/login');
-  // res.render('index');
+app.get('/create', checkUser, function(req, res) {
+  // res.redirect('/index');
+  res.render('index');
 });
 
 app.get('/signup', function(req, res) {
@@ -84,6 +84,7 @@ app.post('/signup', function(req, res) {
   });
 }); 
 
+
 app.post('/login', function(req, res) {
   // console.log('POST login: ', req.body);
   var username = req.body.username;
@@ -111,18 +112,20 @@ app.post('/login', function(req, res) {
 
 });
 
-app.get('/links', function(req, res) {
+app.get('/links', checkUser, function(req, res) {
   // res.cookie('visited', 'links');
   // console.log('auth', req.cookies);
   // console.log('!req.cookies', !req.cookies);
   //console.log('res', res.cookie());
-  if (req.cookies.post) {
-    Links.reset().fetch().then(function(links) {
-      res.status(200).send(links.models);   
-    }); 
-  } else {
-    res.redirect('/login');
-  }
+/***************** the following one works *******************
+  // if (req.cookies.post) {
+  //   Links.reset().fetch().then(function(links) {
+  //     res.status(200).send(links.models);   
+  //   }); 
+  // } else {
+  //   res.redirect('/login');
+  // }
+********************************************************/
   // if (!req.cookies) {
   //   res.redirect('/login');
   // } else {
@@ -131,13 +134,13 @@ app.get('/links', function(req, res) {
   //     res.status(200).send(links.models);   
   //   });
   // }
-  // Links.reset().fetch().then(function(links) {
-  //   res.status(200).send(links.models);
+  Links.reset().fetch().then(function(links) {
+    res.status(200).send(links.models);
+  });
     // res.redirect('/login');
 });
 
-app.post('/links', 
-function(req, res) {
+app.post('/links', checkUser, function(req, res) {
   var uri = req.body.url;
   res.cookie('post', 'yes');
   if (!util.isValidUrl(uri)) {
@@ -173,9 +176,9 @@ app.get('/logout', function(req, res) {
     res.redirect('/');
   });
 });
-/************************************************************/
+/***********************************************************
 // Write your authentication routes here
-/************************************************************/
+/***********************************************************
 
 
 
