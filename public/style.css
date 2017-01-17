@@ -1,6 +1,7 @@
 body {
   margin: 0;
   margin-top: 10px;
+  padding: 40px;
   font-family: arial, sans-serif;
 }
 
@@ -134,4 +135,11 @@ form input[type=text], form input[type=password] {
 
 .creator .message {
   clear: both;
+}
+.btn {
+  width: 360px;
+  margin-left: 10px;
+}
+.create_on_login {
+  margin-left: 10px;
 }

@@ -1,0 +1,20 @@
+{
+  "name": "hrsf53-shortly-express",
+  "main": "index.js",
+  "version": "0.0.0",
+  "homepage": "https://github.com/Taehoonjth/hrsf53-shortly-express",
+  "authors": [
+    "Hack Reactor Students <accounts@hackreactor.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap-social": "~5.1.1"
+  }
+}
