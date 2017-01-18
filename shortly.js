@@ -5,7 +5,8 @@ var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
 var bcrypt = require('bcrypt-nodejs');
-
+var passport = require('passport');
+var githubStrategy = require('passport-github2').Strategy;
 
 var db = require('./app/config');
 var Users = require('./app/collections/users');
@@ -43,9 +44,6 @@ var checkUser = function(req, res, next) {
 
 app.get('/', checkUser, function(req, res) {
   res.render('index');
-
-  // res.cookie('visited', '/');
-  // res.redirect('/login');
 });
 
 app.get('/login', function(req, res) {
@@ -54,7 +52,6 @@ app.get('/login', function(req, res) {
 });
 
 app.get('/create', checkUser, function(req, res) {
-  // res.redirect('/index');
   res.render('index');
 });
 
@@ -62,18 +59,15 @@ app.get('/signup', function(req, res) {
   res.render('signup');
 });
 app.post('/signup', function(req, res) {
-  // console.log('POST signup: ', req.body);
   new User(req.body).fetch().then(function(found) {
     if (found) {
       res.status(200).send('This username is already taken.');
     } else {
       var hash = bcrypt.hashSync(req.body.password);
-      // console.log('signup, password', req.body.password, 'hash: ', hash);
       Users.create({
         username: req.body.username,
         password: hash
       }).then(function() {
-        // res.location = '/';
         req.session.regenerate(function() {
           req.session.user = req.body.username;
           req.session.cookie.expires = new Date(Date.now() + 30000);
@@ -86,11 +80,9 @@ app.post('/signup', function(req, res) {
 
 
 app.post('/login', function(req, res) {
-  // console.log('POST login: ', req.body);
   var username = req.body.username;
   var password = req.body.password;
-  //var hash = bcrypt.hashSync(password);
-  //console.log('Login, password', password, 'hash: ', hash);
+
   new User({'username': username}).fetch().then(function(found) {
     console.log('found, ', found);
     if (found) {
@@ -104,7 +96,6 @@ app.post('/login', function(req, res) {
         req.session.cookie.expires = new Date(Date.now() + 30000);
         res.redirect('/');
       });
-      // res.status(200).redirect('/');
     } else {
       res.status(404).redirect('/login');
     }
@@ -113,10 +104,6 @@ app.post('/login', function(req, res) {
 });
 
 app.get('/links', checkUser, function(req, res) {
-  // res.cookie('visited', 'links');
-  // console.log('auth', req.cookies);
-  // console.log('!req.cookies', !req.cookies);
-  //console.log('res', res.cookie());
 /***************** the following one works *******************
   // if (req.cookies.post) {
   //   Links.reset().fetch().then(function(links) {
@@ -126,18 +113,10 @@ app.get('/links', checkUser, function(req, res) {
   //   res.redirect('/login');
   // }
 ********************************************************/
-  // if (!req.cookies) {
-  //   res.redirect('/login');
-  // } else {
-  //   res.cookie('links', 'yes');
-  //   Links.reset().fetch().then(function(links) {
-  //     res.status(200).send(links.models);   
-  //   });
-  // }
+
   Links.reset().fetch().then(function(links) {
     res.status(200).send(links.models);
   });
-    // res.redirect('/login');
 });
 
 app.post('/links', checkUser, function(req, res) {

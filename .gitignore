@@ -2,6 +2,7 @@ node_modules
 db/*.sqlite
 *.DS_Store
 
+bower_components
 # Floobits
 .floo
 .floobit
